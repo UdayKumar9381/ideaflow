@@ -10,22 +10,22 @@ import type {
 } from '../types';
 
 // Use process.env.NEXT_PUBLIC_API_URL per user requirements
-// We ensure no trailing slash here
+// New Backend: https://ideaflow-4wmf.onrender.com
 const getBaseUrl = () => {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    const fallback = 'https://ideaflow-backend-xerc.onrender.com';
+    const fallback = 'https://ideaflow-4wmf.onrender.com';
     const url = envUrl || fallback;
     return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
 const API_URL = getBaseUrl();
 
-// Log baseURL once for debugging
-console.log('🚀 IDEAFlow API Base URL:', API_URL);
+// MANDATORY DEBUG LOG PER USER REQUEST
+console.log("API BASE URL:", API_URL);
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  withCredentials: true, // Required for cross-origin cookies
   headers: {
     'Content-Type': 'application/json',
   }

@@ -25,8 +25,8 @@ Vercel usually detects Vite automatically, but ensure these settings are correct
 This is the most critical step to connect to your backend.
 1. Expand the **Environment Variables** section.
 2. Add the following key-value pair:
-   - **Key**: `VITE_API_URL`
-   - **Value**: `https://ideaflow-backend-xerc.onrender.com`
+   - **Key**: `NEXT_PUBLIC_API_URL`
+   - **Value**: `https://ideaflow-4wmf.onrender.com`
 3. Click **Add**.
 
 ### 4. Deploy
