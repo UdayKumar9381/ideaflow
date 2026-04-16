@@ -22,7 +22,13 @@ export default function AIAssistant() {
   useEffect(() => {
     // Scroll to bottom when message list changes or when assistant is opened
     if (scrollRef.current && isOpen) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scroll = () => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      };
+      // Use requestAnimationFrame for smoother and more reliable scroll after layout
+      requestAnimationFrame(scroll);
     }
   }, [messages, isTyping, isOpen]);
 

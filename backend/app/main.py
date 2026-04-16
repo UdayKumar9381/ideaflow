@@ -161,5 +161,5 @@ async def health_check(db: AsyncSession = Depends(get_db)):
                 "database": "disconnected",
                 "error": str(e)
             },
-            headers=get_cors_headers(None) # Generic headers
+            headers=get_cors_headers(request) # Consistent headers
         )

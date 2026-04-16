@@ -27,11 +27,16 @@ export function useChecklist() {
     if (!title.trim()) return false;
     try {
       const payload: Partial<ChecklistItem> = { title, priority, category };
-      if (dueDate) {
+      if (dueDate && dueDate.trim()) {
         try {
-          payload.due_date = new Date(dueDate).toISOString();
+          const dateObj = new Date(dueDate);
+          if (!isNaN(dateObj.getTime())) {
+            payload.due_date = dateObj.toISOString();
+          } else {
+            console.error('Invalid date format:', dueDate);
+          }
         } catch (e) {
-          console.error('Invalid date format:', dueDate);
+          console.error('Error parsing date:', dueDate, e);
         }
       }
       

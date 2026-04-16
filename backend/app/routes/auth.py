@@ -22,19 +22,32 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/signup", response_model=UserOut)
 async def signup(user_data: UserSignup, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.email == user_data.email))
-    if result.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail=ERROR_MSG_EMAIL_TAKEN)
-    
-    new_user = User(
-        name=user_data.name,
-        email=user_data.email,
-        password_hash=get_password_hash(user_data.password)
-    )
-    db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
-    return new_user
+    try:
+        logger.info(f"SIGNUP ATTEMPT: {user_data.email}")
+        result = await db.execute(select(User).where(User.email == user_data.email))
+        if result.scalar_one_or_none():
+            logger.warning(f"SIGNUP FAILED: Email already taken - {user_data.email}")
+            raise HTTPException(status_code=400, detail=ERROR_MSG_EMAIL_TAKEN)
+        
+        new_user = User(
+            name=user_data.name,
+            email=user_data.email,
+            password_hash=get_password_hash(user_data.password)
+        )
+        db.add(new_user)
+        await db.commit()
+        await db.refresh(new_user)
+        logger.info(f"SIGNUP SUCCESS: {user_data.email}")
+        return new_user
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.error(f"CRITICAL SIGNUP ERROR for {user_data.email}: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Internal Server Error during signup: {type(e).__name__}: {str(e)}"
+        )
 
 import traceback
 import logging
