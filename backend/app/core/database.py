@@ -4,7 +4,7 @@ from .config import settings
 
 # Create engine with pool_pre_ping to automatically handle disconnected connections (common in production/Render)
 engine = create_async_engine(
-    settings.DATABASE_URL, 
+    settings.ASYNC_DATABASE_URL, 
     echo=True,
     pool_pre_ping=True,
     pool_recycle=3600,
