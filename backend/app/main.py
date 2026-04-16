@@ -106,23 +106,12 @@ app.include_router(checklist.router)
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("🚀 Starting IdeaFlow API...")
-
-    # Create tables
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        logger.info("✅ Tables ready")
+        print("✅ Tables created")
     except Exception as e:
-        logger.error(f"❌ Table creation failed: {str(e)}")
-
-    # DB connection test
-    try:
-        async with engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
-        logger.info("✅ Database connected successfully")
-    except Exception as e:
-        logger.error(f"❌ Database connection failed: {str(e)}")
+        print("❌ DB Error:", e)
 
 # ------------------- ROUTES -------------------
 
