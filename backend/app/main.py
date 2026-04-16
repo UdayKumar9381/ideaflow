@@ -112,6 +112,24 @@ app.include_router(notes.router)
 app.include_router(projects.router)
 app.include_router(checklist.router)
 
+@app.on_event("startup")
+async def startup_event():
+    url = settings.ASYNC_DATABASE_URL
+    if "localhost" in url:
+        logger.warning("DATABASE_DIAGNOSTIC: Application is connecting to LOCALHOST. If this is production, your DATABASE_URL environment variable is missing!")
+    else:
+        # Sanitize and log the host for verification
+        try:
+            # Simple sanitization: keep protocol and host, hide credentials
+            parts = url.split("@")
+            if len(parts) > 1:
+                host_info = parts[1]
+                logger.info(f"DATABASE_DIAGNOSTIC: Connecting to database at {host_info}")
+            else:
+                logger.info(f"DATABASE_DIAGNOSTIC: Connecting to {url}")
+        except:
+            logger.info("DATABASE_DIAGNOSTIC: Connecting to database (URL could not be parsed for log)")
+
 @app.get("/")
 async def root():
     return {

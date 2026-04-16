@@ -6,11 +6,15 @@ load_dotenv()
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "IdeaFlow"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+
     @property
     def ASYNC_DATABASE_URL(self) -> str:
-        url = os.getenv("DATABASE_URL", "")
+        url = self.DATABASE_URL
         if not url:
-            # Fallback for local development
+            # If on Render and URL is missing, it's a configuration error
+            if os.getenv("RENDER"):
+                return "MISSING_DATABASE_URL_IN_PRODUCTION_CHECK_RENDER_DASHBOARD"
             return "mysql+aiomysql://user:password@localhost/ideaflow"
         
         # Some providers give mysql:// but sqlalchemy async needs mysql+aiomysql://
@@ -20,9 +24,6 @@ class Settings(BaseSettings):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
             
         return url
-
-    # Keeping this for backwards compatibility if needed elsewhere
-    DATABASE_URL: str = "" 
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-change-it")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
