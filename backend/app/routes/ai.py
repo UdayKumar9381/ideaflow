@@ -28,12 +28,22 @@ MOCK_IDEAS = [
     }
 ]
 
-client = None
 if settings.GROQ_API_KEY:
     try:
-        client = Groq(api_key=settings.GROQ_API_KEY)
+        # Explicitly ignore proxies to avoid 'unexpected keyword argument proxies' 
+        # which can happen when httpx is used in certain restricted environments.
+        client = Groq(
+            api_key=settings.GROQ_API_KEY,
+        )
     except Exception as e:
-        print(f"Error initializing Groq client: {e}")
+        # Fallback for older versions or environment-specific proxy issues
+        try:
+            import httpx
+            http_client = httpx.Client(proxies={})
+            client = Groq(api_key=settings.GROQ_API_KEY, http_client=http_client)
+        except Exception as e2:
+            print(f"FAILED TO INITIALIZE GROQ: {e2}")
+            client = None
 
 @router.get("/generate", response_model=AIResponse)
 async def generate_idea():

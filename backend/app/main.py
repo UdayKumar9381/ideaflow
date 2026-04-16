@@ -153,7 +153,7 @@ async def root():
     }
 
 @app.get("/health")
-async def health_check(db: AsyncSession = Depends(get_db)):
+async def health_check(request: Request, db: AsyncSession = Depends(get_db)):
     """Diagnostic endpoint to verify DB and API health"""
     try:
         start_time = time.time()
