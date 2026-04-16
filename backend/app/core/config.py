@@ -22,7 +22,10 @@ class Settings(BaseSettings):
         elif url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
         
-        # Failsafe: if it's already mysql+aiomysql://, do nothing
+        # Strip query parameters (like ?ssl-mode=...) that aiomysql doesn't support
+        if "?" in url:
+            url = url.split("?")[0]
+            
         return url
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-change-it")
     ALGORITHM: str = "HS256"
