@@ -12,17 +12,17 @@ class Settings(BaseSettings):
     def ASYNC_DATABASE_URL(self) -> str:
         url = self.DATABASE_URL
         if not url:
-            # If on Render and URL is missing, it's a configuration error
             if os.getenv("RENDER"):
-                return "MISSING_DATABASE_URL_IN_PRODUCTION_CHECK_RENDER_DASHBOARD"
-            return "mysql+aiomysql://user:password@localhost/ideaflow"
+                return "MISSING_DATABASE_URL_PRODUCTION"
+            return "mysql+aiomysql://root:Uday%40123@localhost/ideaflow"
         
-        # Some providers give mysql:// but sqlalchemy async needs mysql+aiomysql://
+        # Ensure we use the async driver
         if url.startswith("mysql://"):
             url = url.replace("mysql://", "mysql+aiomysql://", 1)
         elif url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-            
+        
+        # Failsafe: if it's already mysql+aiomysql://, do nothing
         return url
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-change-it")
     ALGORITHM: str = "HS256"

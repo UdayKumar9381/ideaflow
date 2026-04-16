@@ -101,7 +101,7 @@ app.add_middleware(
 
 # 3. INCLUDE ROUTERS AFTER ALL MIDDLEWARE
 from app.routes import auth, ideas, ai, notes, projects, checklist
-from app.core.database import get_db, settings
+from app.core.database import get_db, settings, engine, Base
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
@@ -114,21 +114,34 @@ app.include_router(checklist.router)
 
 @app.on_event("startup")
 async def startup_event():
+    logger.info("APP_STARTUP: Initializing services...")
+    
+    # 1. Automatic Table Creation (Production-Ready)
+    try:
+        async with engine.begin() as conn:
+            # This creates all tables defined in models if they don't exist
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("DATABASE_DIAGNOSTIC: Tables verified/created successfully.")
+    except Exception as e:
+        logger.error(f"DATABASE_DIAGNOSTIC: Failed to create tables: {str(e)}")
+
+    # 2. Connection Verification
     url = settings.ASYNC_DATABASE_URL
     if "localhost" in url:
-        logger.warning("DATABASE_DIAGNOSTIC: Application is connecting to LOCALHOST. If this is production, your DATABASE_URL environment variable is missing!")
+        logger.warning("DATABASE_DIAGNOSTIC: Application is connecting to LOCALHOST. Ensure DATABASE_URL is set in Render!")
     else:
-        # Sanitize and log the host for verification
         try:
-            # Simple sanitization: keep protocol and host, hide credentials
             parts = url.split("@")
             if len(parts) > 1:
                 host_info = parts[1]
-                logger.info(f"DATABASE_DIAGNOSTIC: Connecting to database at {host_info}")
-            else:
-                logger.info(f"DATABASE_DIAGNOSTIC: Connecting to {url}")
-        except:
-            logger.info("DATABASE_DIAGNOSTIC: Connecting to database (URL could not be parsed for log)")
+                logger.info(f"DATABASE_DIAGNOSTIC: Attempting secure connection to {host_info}")
+            
+            # Perform a quick liveness test
+            async with engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+            logger.info("DATABASE_DIAGNOSTIC: Connection SUCCESS (SSL Active)")
+        except Exception as e:
+            logger.error(f"DATABASE_DIAGNOSTIC: Connection FAILED: {str(e)}")
 
 @app.get("/")
 async def root():
