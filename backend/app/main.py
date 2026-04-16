@@ -1,21 +1,25 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 import time
 import logging
 import traceback
+
+# Correct imports
+from app.core.database import get_db, engine, Base
+from app.core.config import settings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api")
 
-# Disable redirect_slashes to prevent CORS issues with trailing slashes
 app = FastAPI(title="IdeaFlow API", redirect_slashes=False)
 
+# ------------------- CORS HEADERS UTILITY -------------------
 def get_cors_headers(request: Request):
-    """Utility to generate CORS headers for exception responses"""
     origin = request.headers.get("origin")
     return {
         "Access-Control-Allow-Origin": origin if origin else "*",
@@ -24,7 +28,8 @@ def get_cors_headers(request: Request):
         "Access-Control-Allow-Headers": "*",
     }
 
-# 1. Global Exception Handler (All internal crashes)
+# ------------------- EXCEPTION HANDLERS -------------------
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"CRITICAL ERROR: {type(exc).__name__}: {str(exc)}")
@@ -40,7 +45,6 @@ async def global_exception_handler(request: Request, exc: Exception):
         headers=get_cors_headers(request)
     )
 
-# 2. HTTP Exception Handler (404, 401, etc.)
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
@@ -49,7 +53,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         headers=get_cors_headers(request)
     )
 
-# 3. Validation Error Handler (422)
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
@@ -58,52 +61,39 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         headers=get_cors_headers(request)
     )
 
-# --- MIDDLEWARE STACK ---
-# NOTE: In Starlette/FastAPI, the LAST middleware added is the OUTERMOST wrapper.
+# ------------------- MIDDLEWARE -------------------
 
-# 1. Diagnostic Middleware (Innermost)
 @app.middleware("http")
 async def log_origin_header(request: Request, call_next):
     origin = request.headers.get("origin")
     method = request.method
     path = request.url.path
+
     if origin:
-        logger.info(f"Incoming Request: {method} {path} from Origin: {origin}")
+        logger.info(f"{method} {path} from {origin}")
     else:
-        logger.info(f"Incoming Request: {method} {path} (No Origin header)")
-    
-    if method == "OPTIONS":
-        logger.info(f"Handling OPTIONS preflight for {path}")
+        logger.info(f"{method} {path} (No Origin)")
 
-    try:
-        response = await call_next(request)
-        return response
-    except Exception as e:
-        logger.error(f"Middleware caught error for {method} {path}: {str(e)}")
-        raise e
+    response = await call_next(request)
+    return response
 
-# 2. CORS Middleware (Outermost)
+# ✅ FIXED CORS (NO trailing slash)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "https://creator-hub-frontend-nine.vercel.app",
-        "https://creator-hub-frontend-nine.vercel.app/",
         "https://ideaflow-f.vercel.app",
         "https://ideaflow-lyart.vercel.app",
-        "https://ideaflow-lyart.vercel.app/",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
-# 3. INCLUDE ROUTERS AFTER ALL MIDDLEWARE
+# ------------------- ROUTES -------------------
+
 from app.routes import auth, ideas, ai, notes, projects, checklist
-from app.core.database import get_db, settings, engine, Base
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
 
 app.include_router(auth.router)
 app.include_router(ideas.router)
@@ -112,61 +102,53 @@ app.include_router(notes.router)
 app.include_router(projects.router)
 app.include_router(checklist.router)
 
+# ------------------- STARTUP -------------------
+
 @app.on_event("startup")
 async def startup_event():
-    logger.info("APP_STARTUP: Initializing services...")
-    
-    # 1. Automatic Table Creation (Production-Ready)
+    logger.info("🚀 Starting IdeaFlow API...")
+
+    # Create tables
     try:
         async with engine.begin() as conn:
-            # This creates all tables defined in models if they don't exist
             await conn.run_sync(Base.metadata.create_all)
-        logger.info("DATABASE_DIAGNOSTIC: Tables verified/created successfully.")
+        logger.info("✅ Tables ready")
     except Exception as e:
-        logger.error(f"DATABASE_DIAGNOSTIC: Failed to create tables: {str(e)}")
+        logger.error(f"❌ Table creation failed: {str(e)}")
 
-    # 2. Connection Verification
-    url = settings.ASYNC_DATABASE_URL
-    if "localhost" in url:
-        logger.warning("DATABASE_DIAGNOSTIC: Application is connecting to LOCALHOST. Ensure DATABASE_URL is set in Render!")
-    else:
-        try:
-            parts = url.split("@")
-            if len(parts) > 1:
-                host_info = parts[1]
-                logger.info(f"DATABASE_DIAGNOSTIC: Attempting secure connection to {host_info}")
-            
-            # Perform a quick liveness test
-            async with engine.connect() as conn:
-                await conn.execute(text("SELECT 1"))
-            logger.info("DATABASE_DIAGNOSTIC: Connection SUCCESS (SSL Active)")
-        except Exception as e:
-            logger.error(f"DATABASE_DIAGNOSTIC: Connection FAILED: {str(e)}")
+    # DB connection test
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        logger.info("✅ Database connected successfully")
+    except Exception as e:
+        logger.error(f"❌ Database connection failed: {str(e)}")
+
+# ------------------- ROUTES -------------------
 
 @app.get("/")
 async def root():
     return {
-        "message": "Welcome to IdeaFlow API", 
+        "message": "IdeaFlow API is running",
         "docs": "/docs",
-        "status": "online",
-        "environment": "production"
+        "status": "online"
     }
 
 @app.get("/health")
 async def health_check(request: Request, db: AsyncSession = Depends(get_db)):
-    """Diagnostic endpoint to verify DB and API health"""
     try:
-        start_time = time.time()
+        start = time.time()
         await db.execute(text("SELECT 1"))
-        latency = time.time() - start_time
+        latency = time.time() - start
+
         return {
             "status": "healthy",
             "database": "connected",
-            "latency_seconds": round(latency, 4),
-            "environment": "production"
+            "latency": round(latency, 4)
         }
+
     except Exception as e:
-        logger.error(f"HEALTH CHECK FAILED: {str(e)}")
+        logger.error(f"Health check failed: {str(e)}")
         return JSONResponse(
             status_code=503,
             content={
@@ -174,5 +156,5 @@ async def health_check(request: Request, db: AsyncSession = Depends(get_db)):
                 "database": "disconnected",
                 "error": str(e)
             },
-            headers=get_cors_headers(request) # Consistent headers
+            headers=get_cors_headers(request)
         )

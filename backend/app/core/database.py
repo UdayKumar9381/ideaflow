@@ -1,15 +1,18 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
+import ssl
 from .config import settings
 
-# Create engine with SSL for production (e.g., Aiven)
+# ✅ Create proper SSL context for Aiven
+ssl_context = ssl.create_default_context()
+
 engine = create_async_engine(
     settings.ASYNC_DATABASE_URL,
     echo=True,
     pool_pre_ping=True,
     pool_recycle=3600,
     connect_args={
-        "ssl": True if "localhost" not in settings.ASYNC_DATABASE_URL else None
+        "ssl": ssl_context   # ✅ FIXED
     }
 )
 
