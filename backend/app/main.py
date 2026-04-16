@@ -90,6 +90,8 @@ app.add_middleware(
         "https://creator-hub-frontend-nine.vercel.app",
         "https://creator-hub-frontend-nine.vercel.app/",
         "https://ideaflow-f.vercel.app",
+        "https://ideaflow-lyart.vercel.app",
+        "https://ideaflow-lyart.vercel.app/",
     ],
     allow_credentials=True,
     allow_methods=["*"],
