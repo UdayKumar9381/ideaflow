@@ -9,7 +9,7 @@ engine = create_async_engine(
     pool_pre_ping=True,
     pool_recycle=3600,
     connect_args={
-        "ssl": {"ssl": True} if "localhost" not in settings.ASYNC_DATABASE_URL else None
+        "ssl": True if "localhost" not in settings.ASYNC_DATABASE_URL else None
     }
 )
 
