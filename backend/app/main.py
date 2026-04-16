@@ -101,7 +101,7 @@ app.add_middleware(
 
 # 3. INCLUDE ROUTERS AFTER ALL MIDDLEWARE
 from app.routes import auth, ideas, ai, notes, projects, checklist
-from app.core.database import get_db
+from app.core.database import get_db, settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
