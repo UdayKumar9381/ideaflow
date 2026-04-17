@@ -109,9 +109,9 @@ async def startup_event():
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        print("✅ Tables created")
+        print("Tables created successfully")
     except Exception as e:
-        print("❌ DB Error:", e)
+        print("DB Error:", e)
 
 # ------------------- ROUTES -------------------
 

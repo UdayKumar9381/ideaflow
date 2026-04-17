@@ -10,7 +10,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({ onAdd }) => {
     <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div className="space-y-2">
         <h2 className="text-4xl font-black text-white tracking-tighter italic uppercase underline decoration-apple-green decoration-4 underline-offset-8">Hackathon Tracker</h2>
-        <p className="text-gray-400 font-medium tracking-tight">Keep your engineering velocity high.</p>
+        <p className="text-white font-bold tracking-tight">Keep your engineering velocity high.</p>
       </div>
       <button 
         onClick={onAdd}

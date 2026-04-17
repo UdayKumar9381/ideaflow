@@ -3,17 +3,18 @@ from sqlalchemy.orm import DeclarativeBase
 import ssl
 from .config import settings
 
-# ✅ Create proper SSL context for Aiven
-ssl_context = ssl.create_default_context()
+# ✅ Conditional SSL context
+connect_args = {}
+if settings.DB_USE_SSL:
+    ssl_context = ssl.create_default_context()
+    connect_args["ssl"] = ssl_context
 
 engine = create_async_engine(
     settings.ASYNC_DATABASE_URL,
     echo=True,
     pool_pre_ping=True,
     pool_recycle=3600,
-    connect_args={
-        "ssl": ssl_context   # ✅ FIXED
-    }
+    connect_args=connect_args
 )
 
 AsyncSessionLocal = async_sessionmaker(

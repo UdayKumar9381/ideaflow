@@ -10,10 +10,10 @@ import type {
 } from '../types';
 
 // Use process.env.NEXT_PUBLIC_API_URL per user requirements
-// New Backend: https://ideaflow-4wmf.onrender.com
-const getBaseUrl = () => {
+  // New Backend: http://localhost:8000
+  const getBaseUrl = () => {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    const fallback = 'https://ideaflow-4wmf.onrender.com';
+    const fallback = 'http://localhost:8000';
     const url = envUrl || fallback;
     return url.endsWith('/') ? url.slice(0, -1) : url;
 };

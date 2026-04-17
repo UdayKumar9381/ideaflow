@@ -5,12 +5,24 @@ from sqlalchemy import pool
 
 from alembic import context
 
+import os
+from app.core.config import settings
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
+# Dynamically set the sqlalchemy.url from the environment
+# Alembic works best with synchronous drivers. We'll use pymysql for migrations.
+db_url = settings.DATABASE_URL
+if db_url.startswith("mysql+aiomysql://"):
+    db_url = db_url.replace("mysql+aiomysql://", "mysql+pymysql://", 1)
+elif db_url.startswith("mysql://") and "mysql+pymysql" not in db_url:
+    db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
+
+config.set_main_option("sqlalchemy.url", db_url)
+
 # Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

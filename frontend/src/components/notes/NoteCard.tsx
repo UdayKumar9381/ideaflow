@@ -26,8 +26,8 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, index, onClick }) => {
             <FileText className="text-soft-pink w-6 h-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-bold text-white mb-1 truncate group-hover:text-soft-pink transition-colors uppercase tracking-tight italic">{note.title}</h4>
-            <p className="text-sm text-gray-500 font-medium line-clamp-2 leading-relaxed">
+            <h4 className="font-bold text-black mb-1 truncate group-hover:text-soft-pink transition-colors uppercase tracking-tight italic">{note.title}</h4>
+            <p className="text-sm text-black font-bold line-clamp-2 leading-relaxed">
               {note.content || 'Click to start writing your creative mission...'}
             </p>
           </div>

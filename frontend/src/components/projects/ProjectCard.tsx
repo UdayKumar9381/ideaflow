@@ -34,7 +34,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, sta
           </span>
           <div className="flex items-center gap-3">
             {daysLeft !== null && (
-              <div className={`flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider ${daysLeft <= 2 ? 'text-rose-500' : 'text-gray-500'}`}>
+              <div className={`flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider ${daysLeft !== null && daysLeft <= 2 ? 'text-rose-500' : 'text-black'}`}>
                 <Calendar className="w-3 h-3" />
                 {daysLeft === 0 ? 'Due Today' : `${daysLeft}d left`}
               </div>
@@ -51,14 +51,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, sta
         <h3 className="text-xl font-black text-white mb-2 truncate group-hover:text-apple-green transition-colors uppercase tracking-tight italic">
           {project.name}
         </h3>
-        <p className="text-sm text-gray-500 font-medium line-clamp-2 mb-6 flex-1 leading-relaxed">
+        <p className="text-sm text-black font-bold line-clamp-2 mb-6 flex-1 leading-relaxed">
           {project.description}
         </p>
 
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
             {project.tech_stack?.split(',').map((tag) => (
-              <span key={tag} className="px-2 py-0.5 bg-white/5 rounded-md text-[9px] font-black text-gray-500 border border-white/5 tracking-wider uppercase">
+              <span key={tag} className="px-2 py-0.5 bg-black/5 rounded-md text-[9px] font-black text-black border border-black/10 tracking-wider uppercase">
                 {tag.trim()}
               </span>
             ))}

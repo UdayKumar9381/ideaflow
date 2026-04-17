@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    DB_USE_SSL: bool = os.getenv("DB_USE_SSL", "True").lower() == "true"
     
     # Mail settings
     MAIL_USERNAME: str = os.getenv("MAIL_USERNAME", "")

@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
     ],
     define: {
-      'process.env.NEXT_PUBLIC_API_URL': JSON.stringify(env.NEXT_PUBLIC_API_URL || 'https://ideaflow-4wmf.onrender.com'),
+      'process.env.NEXT_PUBLIC_API_URL': JSON.stringify(env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'),
       'process.env.NODE_ENV': JSON.stringify(mode),
     },
   };

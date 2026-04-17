@@ -64,14 +64,14 @@ export default function NotionView() {
             <input 
               value={activeNote.title}
               onChange={(e) => updateActiveNoteContent({ title: e.target.value })}
-              className="text-4xl md:text-5xl font-black bg-transparent border-none outline-none text-white placeholder:text-gray-900 mb-10 italic tracking-tighter uppercase focus:ring-0"
+              className="text-4xl md:text-5xl font-black bg-transparent border-none outline-none text-black placeholder:text-gray-900/50 mb-10 italic tracking-tighter uppercase focus:ring-0"
               placeholder="Untitled Document"
             />
             
             <textarea 
               value={activeNote.content}
               onChange={(e) => updateActiveNoteContent({ content: e.target.value })}
-              className="flex-1 w-full bg-transparent border-none outline-none text-xl text-gray-400 font-medium leading-relaxed resize-none focus:ring-0 placeholder:text-gray-900 scrollbar-hide"
+              className="flex-1 w-full bg-transparent border-none outline-none text-xl text-black font-bold leading-relaxed resize-none focus:ring-0 placeholder:text-gray-900/50 scrollbar-hide"
               placeholder="Write your creative mission..."
             />
           </motion.div>

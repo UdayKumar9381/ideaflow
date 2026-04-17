@@ -12,7 +12,7 @@ export const IdeaHeader: React.FC<IdeaHeaderProps> = ({ onGenerate, onAdd, isGen
     <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div className="space-y-1">
         <h2 className="text-4xl font-black text-white tracking-tighter italic uppercase">Idea Flow</h2>
-        <p className="text-gray-400 font-medium tracking-tight">Capture breakthroughs as they happen.</p>
+        <p className="text-black font-bold tracking-tight">Capture breakthroughs as they happen.</p>
       </div>
       <div className="flex gap-4">
         <button 

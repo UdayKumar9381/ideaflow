@@ -30,7 +30,9 @@ export const IdeaItem: React.FC<IdeaItemProps> = ({ idea, onToggle, onDelete }) 
           }`}>
             {idea.title}
           </h3>
-          <p className="text-sm text-gray-400 font-medium leading-relaxed">
+          <p className={`text-sm font-bold leading-relaxed transition-all ${
+            idea.status === 'done' ? 'text-black/30 line-through' : 'text-black'
+          }`}>
             {idea.description}
           </p>
         </div>

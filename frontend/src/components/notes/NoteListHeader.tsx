@@ -10,7 +10,7 @@ export const NoteListHeader: React.FC<NoteListHeaderProps> = ({ onAdd }) => {
     <div className="flex items-center justify-between">
       <div className="space-y-1">
         <h2 className="text-3xl font-black text-white tracking-tighter italic uppercase underline decoration-soft-pink decoration-4 underline-offset-8">Notion Workspace</h2>
-        <p className="text-gray-400 font-medium tracking-tight">Your digital brain for long-form thoughts.</p>
+        <p className="text-white font-bold tracking-tight">Your digital brain for long-form thoughts.</p>
       </div>
       <button 
         onClick={onAdd}
